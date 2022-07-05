@@ -51,36 +51,82 @@ export const getAll = async (req, res) => {
 }
 
 export const createPost = async (req, res) => {
-
-    // return res.json({success: true})
-
     try {
-        const {title, text, tags, userId} = req.body
+      const doc = new PostModel({
+        title: req.body.title,
+        text: req.body.text,
+        imageUrl: req.body.imageUrl,
+        tags: req.body.tags.split(','),
+        user: req.body.userId,
+        
+      });
+  
+      const post = await doc.save();
+  
+      res.status(200).json(post);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: 'Cannot create new post',
+      });
+    } 
+  };
+
+
+
+export const remove = async (req,res) => {
+    try {
+        const postId = req.params.id;
 
         
-
-        const doc = new PostModel({
-            title,
-            text, 
-            tags, 
-            user: userId
+        PostModel.findOneAndDelete({
+            _id: postId
+        }, (err, doc) => {
+            if(err) {
+                return res.status(500).json({
+                    message: "Can't delete post"
+                })
+            } 
+            console.log(doc)
+            if(!doc) {
+                return res.json({
+                    message: "Post is not found"
+                })
+            }
+            
         })
 
-    
-        const post = await doc.save()
-        const newPost = post._doc
-        res.status(200).json({
-            ...newPost
+        return res.status(200).json({
+            message: 'Deleted post: '+  postId
         })
     } catch (error) {
-        return res.status(400).json({
-            error
+        return res.status(500).json({
+            message: error
         })
     }
+};
 
 
+export const update = async (req, res) => {
+    try {
+        const postId = req.params.id
+        
+        await PostModel.updateOne({
+            _id: postId
+        }, {
+            title: req.body.title,
+            text: req.body.text,
+            user: req.body.userId,
+            tags: req.body.tags
+           }
+        )
 
-    res.json({success: true})
-}; 
-
-export const a = {}
+        return res.status(200).json({
+            message: "Post was updated"
+        })
+    } catch (error){
+        return res.status(500).json({
+            message: error
+        })
+    }
+}

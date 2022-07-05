@@ -42,7 +42,7 @@ export const register =  async (req, res) => {
             expiresIn: '30d'
         })
 
-        console.log(newUser)
+        console.log({newUser, token})
         const {passwordHash,  ...userData} = newUser._doc
 
         res.json({success: true, ...userData, token})
@@ -84,6 +84,6 @@ export const login = async (req, res) => {
             token
         })
     } catch (err) {
-
+        console.log('login error: ', err)
     }
 }
